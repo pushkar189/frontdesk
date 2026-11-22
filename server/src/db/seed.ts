@@ -12,14 +12,18 @@ async function ist(dateStr: string): Promise<Date> {
 }
 
 export async function seed(pool: Pool): Promise<void> {
-  console.log('[seed] Starting idempotent seed...');
+  // Idempotency guard: ticket_events is append-only (immutable trigger),
+  // so we can't wipe and re-seed. Instead, skip if already seeded.
+  const existing = await pool.query(
+    `SELECT id FROM users WHERE email = $1 LIMIT 1`,
+    ['priya@arvo.example']
+  );
+  if (existing.rows.length > 0) {
+    console.log('[seed] Already seeded — skipping.');
+    return;
+  }
 
-  // Clear existing seed data (by email pattern)
-  await pool.query(`DELETE FROM ticket_events`);
-  await pool.query(`DELETE FROM messages`);
-  await pool.query(`DELETE FROM tickets`);
-  await pool.query(`DELETE FROM holidays`);
-  await pool.query(`DELETE FROM users`);
+  console.log('[seed] Starting seed...');
 
   // ── Users ─────────────────────────────────────────────────
   const hash = (pw: string) => bcrypt.hash(pw, 10);
