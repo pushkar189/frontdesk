@@ -1,20 +1,20 @@
-# ── Stage 1: build web ──────────────────────────────────────
+# ── Stage 1: build web ──────────────────────────────────────────────────
 FROM node:20-alpine AS web-builder
 WORKDIR /app/web
 COPY web/package.json web/package-lock.json* ./
-RUN npm ci --legacy-peer-deps
+RUN npm ci --include=dev --legacy-peer-deps
 COPY web/ ./
 RUN npm run build
 
-# ── Stage 2: build server ────────────────────────────────────
+# ── Stage 2: build server ────────────────────────────────────────────────
 FROM node:20-alpine AS server-builder
 WORKDIR /app/server
 COPY server/package.json server/package-lock.json* ./
-RUN npm ci --legacy-peer-deps
+RUN npm ci --include=dev --legacy-peer-deps
 COPY server/ ./
 RUN npm run build
 
-# ── Stage 3: runtime ─────────────────────────────────────────
+# ── Stage 3: runtime ─────────────────────────────────────────────────────
 FROM node:20-alpine AS runtime
 WORKDIR /app
 
