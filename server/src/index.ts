@@ -4,6 +4,7 @@ import cors from 'cors';
 import path from 'path';
 import { getPool } from './db/pool';
 import { runMigrations } from './db/migrate';
+import { seed as runSeed } from './db/seed';
 import { setHolidayFetcher, getHolidaysFromDB } from './domain/sla';
 import { startScheduler } from './jobs/sweep';
 import { errorHandler, notFound } from './middleware/errorHandler';
@@ -60,6 +61,9 @@ async function main() {
 
   // Run migrations
   await runMigrations(pool);
+
+  // Run idempotent seed (safe to run on every boot)
+  await runSeed(pool);
 
   // Set up holiday fetcher for SLA calculations
   setHolidayFetcher(getHolidaysFromDB);
