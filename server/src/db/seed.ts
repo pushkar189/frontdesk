@@ -83,8 +83,12 @@ export async function seed(pool: Pool): Promise<void> {
     slaBreached?: boolean;
     parentTicketId?: string;
   }): Promise<string> {
+    // If string has tz info ('+' offset or trailing 'Z'), parse directly.
+    // Otherwise treat as bare IST datetime string.
     const createdAt = opts.createdAt
-      ? (opts.createdAt.includes('+') ? new Date(opts.createdAt) : await ist(opts.createdAt))
+      ? (opts.createdAt.includes('+') || opts.createdAt.endsWith('Z')
+          ? new Date(opts.createdAt)
+          : await ist(opts.createdAt))
       : new Date();
 
     const assigneeId = opts.assigneeEmail ? userIds[opts.assigneeEmail] : null;
