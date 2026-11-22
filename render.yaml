@@ -4,7 +4,7 @@ services:
     env: node
     plan: free
     buildCommand: |
-      cd web && npm ci --legacy-peer-deps && npm run build && cd ../server && npm ci --legacy-peer-deps && npm run build
+      cd web && npm ci --include=dev --legacy-peer-deps && npm run build && cd ../server && npm ci --legacy-peer-deps && npm run build
     startCommand: node server/dist/index.js
     envVars:
       - key: NODE_ENV
